@@ -1,0 +1,10 @@
+opencv-python
+sounddevice
+wavio
+SpeechRecognition
+torch
+torchvision
+torchaudio
+numpy
+requests
+Pillow
