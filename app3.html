@@ -1,0 +1,1650 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>In-Vehicle Infotainment System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        'harrier-dark': '#0F172A',
+                        'harrier-panel': '#1E293B',
+                        'harrier-accent': '#06B6D4',
+                        'harrier-text': '#E2E8F0',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+        
+        body {
+            background-color: #0F172A; 
+            color: #E2E8F0;
+            min-height: 100vh;
+        }
+
+        #infotainment-screen {
+            background-color: #111827;
+            border-radius: 0.75rem;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
+            height: 600px;
+            border: 4px solid #374151;
+        }
+
+        .harrier-card {
+            background-color: #1E293B;
+            border: 1px solid #334155;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-car-primary {
+            background-color: #3B82F6;
+            transition: background-color 0.2s, transform 0.1s;
+        }
+        .btn-car-primary:hover {
+            background-color: #2563EB;
+            box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.4);
+        }
+        .btn-car-primary:active {
+            transform: scale(0.98);
+        }
+        
+        .btn-car-secondary {
+            background-color: #475569;
+            transition: background-color 0.2s;
+        }
+        .btn-car-secondary:hover {
+            background-color: #64748B;
+        }
+
+        .insta-post {
+            max-width: 420px;
+            margin: auto;
+            background-color: #1E293B;
+            border: 1px solid #334155;
+        }
+        .profile-pic {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: 2px solid #E11D48;
+        }
+        .post-image {
+            width: 100%;
+            height: auto;
+            aspect-ratio: 1 / 1;
+            object-fit: cover;
+        }
+
+        /* Music player styles */
+        .music-player {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3730a3 100%);
+            border: 1px solid #4f46e5;
+        }
+        
+        .progress-bar {
+            background: #4f46e5;
+            height: 4px;
+            border-radius: 2px;
+            transition: width 0.1s linear;
+        }
+        
+        .playing {
+            border-left: 3px solid #06B6D4;
+            background: rgba(6, 182, 212, 0.1);
+        }
+
+        /* Toggle switch */
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+        }
+        
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #475569;
+            transition: .4s;
+            border-radius: 24px;
+        }
+        
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        
+        input:checked + .toggle-slider {
+            background-color: #06B6D4;
+        }
+        
+        input:checked + .toggle-slider:before {
+            transform: translateX(26px);
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8 flex flex-col items-center justify-center">
+
+    <div id="infotainment-screen" class="w-full max-w-5xl overflow-hidden relative">
+        <header id="top-bar" class="flex justify-between items-center px-6 py-3 bg-gray-900 text-harrier-text font-light border-b border-gray-700 h-[60px]">
+            <div class="flex items-center space-x-4">
+                <button id="back-button" class="text-xl hover:text-harrier-accent transition hidden">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                </button>
+                <div class="text-lg font-medium" id="current-time">04:33 PM</div>
+            </div>
+            
+            <div class="text-xl font-semibold text-harrier-accent" id="app-title">Tata Vibe</div>
+
+            <div class="flex items-center space-x-4">
+                <span class="text-sm font-light text-green-400">AQI 14</span>
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-cyan-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21.5l-10-8.5 10-8.5 10 8.5z"/></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 20l4 0l0-14l-4 0l0 14zM4 16l4 0l0-10l-4 0l0 10zM16 12l4 0l0-6l-4 0l0 6z"/></svg>
+            </div>
+        </header>
+
+        <div id="app-container" class="h-[calc(100%-60px)] p-6 overflow-y-auto">
+            
+            <!-- Home Screen -->
+            <section id="home-screen" class="grid grid-cols-2 gap-6 h-full items-start">
+                <div id="media-tile" class="harrier-card p-6 rounded-xl flex flex-col justify-center items-center space-y-4 cursor-pointer transition hover:bg-harrier-accent/10 h-56">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-12 h-12 text-harrier-accent" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+                    <p class="text-xl font-medium">Media</p>
+                </div>
+                
+                <div id="navigation-tile" class="harrier-card p-6 rounded-xl flex flex-col justify-center items-center space-y-4 cursor-pointer transition hover:bg-harrier-accent/10 h-56">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-12 h-12 text-green-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
+                    <p class="text-xl font-medium">Navigation</p>
+                </div>
+
+                <div id="climate-tile" class="harrier-card p-6 rounded-xl flex flex-col justify-center items-center space-y-4 cursor-pointer transition hover:bg-harrier-accent/10 h-56">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-12 h-12 text-red-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a7 7 0 0 0-7 7c0 5.5 7 12 7 12s7-6.5 7-12a7 7 0 0 0-7-7z"/><path d="M12 15a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"/></svg>
+                    <p class="text-xl font-medium">Climate</p>
+                </div>
+                
+                <div id="social-app-tile" class="harrier-card p-6 rounded-xl flex flex-col justify-center items-center space-y-4 cursor-pointer transition hover:bg-harrier-accent/10 hover:border-harrier-accent border-2 border-transparent h-56">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-12 h-12 text-purple-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 8a4 4 0 0 1 4 4 4 4 0 0 1-4 4M8 16a4 4 0 0 1-4-4 4 4 0 0 1 4-4"/><line x1="12" x2="12" y1="8" y2="16"/><line x1="8" x2="16" y1="12" y2="12"/></svg>
+                    <p class="text-xl font-medium text-purple-400">Social Post</p>
+                </div>
+            </section>
+
+            <!-- Social App View (Existing) -->
+            <section id="social-app-view" class="hidden h-full">
+                <header class="text-center mb-6">
+                    <h1 class="text-2xl font-bold text-harrier-text mb-1">AI Content Curation</h1>
+                    <p class="text-harrier-accent/70 text-sm">Ollama (LLaVA + Mistral) + Hugging Face (SDXL)</p>
+                </header>
+
+                <section id="upload-section" class="harrier-card p-6 rounded-xl space-y-4">
+                    <h2 class="text-xl font-semibold text-harrier-text">1. Capture the Moment</h2>
+                    <p class="text-gray-400">Upload an image to analyze emotion and generate content.</p>
+                    <input type="file" id="image-upload" accept="image/*" class="w-full text-sm text-gray-300
+                        file:mr-4 file:py-2 file:px-4
+                        file:rounded-lg file:border-0
+                        file:text-sm file:font-semibold
+                        file:bg-cyan-600 file:text-white
+                        hover:file:bg-cyan-700
+                        cursor-pointer
+                    ">
+                    <div class="bg-yellow-900/30 border border-yellow-600 rounded-lg p-3">
+                        <p class="text-yellow-300 text-sm">⚠️ <strong>Required:</strong> Set your Hugging Face API token in the code (line 180)</p>
+                        <p class="text-yellow-200 text-xs mt-1">Get free token at: huggingface.co/settings/tokens</p>
+                    </div>
+                    <button id="analyze-button" class="btn-car-primary w-full py-2 px-4 text-white font-medium rounded-lg opacity-50 cursor-not-allowed" disabled>
+                        <span id="analyze-text">Analyze & Generate Content</span>
+                    </button>
+                </section>
+
+                <section id="loading-section" class="hidden mt-6 harrier-card p-6 rounded-xl text-center">
+                    <div class="flex items-center justify-center space-x-3">
+                        <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-harrier-accent"></div>
+                        <p class="text-lg text-harrier-accent font-medium" id="loading-message">Processing...</p>
+                    </div>
+                    <p class="text-sm text-gray-400 mt-2" id="loading-submessage">Running AI pipeline...</p>
+                </section>
+
+                <section id="approval-section" class="hidden mt-6">
+                    <div class="harrier-card p-6 rounded-xl space-y-4 mb-6">
+                        <h2 class="text-xl font-semibold text-harrier-text">2. AI-Generated Content (Review)</h2>
+                        <div class="bg-gray-800 p-3 rounded-lg border-l-4 border-harrier-accent">
+                            <p class="text-sm text-gray-400 mb-1">Detected Emotion & Scene:</p>
+                            <p id="ai-context" class="font-bold text-lg text-harrier-accent"></p>
+                        </div>
+                        
+                        <div class="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-4">
+                            <div class="w-full md:w-1/2">
+                                <p class="text-sm text-gray-400 mb-2">Original Upload:</p>
+                                <img id="approval-image-preview" src="" alt="Original" class="w-full h-auto rounded-lg shadow-lg aspect-square object-cover border border-gray-600">
+                            </div>
+                            <div class="w-full md:w-1/2">
+                                <p class="text-sm text-gray-400 mb-2">AI-Generated Scene (SDXL):</p>
+                                <img id="generated-image-preview" src="" alt="Generated Scene" class="w-full h-auto rounded-lg shadow-lg aspect-square object-cover border border-cyan-500">
+                            </div>
+                        </div>
+
+                        <div class="mt-4">
+                            <p class="text-sm text-gray-400 mb-2">AI Caption (Mistral):</p>
+                            <p id="suggested-caption" class="text-harrier-text text-xl font-light italic mb-2"></p>
+                            <p id="suggested-hashtags" class="text-cyan-400 text-sm font-light"></p>
+                            
+                            <div class="mt-4 p-3 bg-gray-700 rounded-lg space-y-3">
+                                <label for="tone-select" class="text-sm font-medium text-cyan-300">Refine Tone</label>
+                                <div class="flex space-x-2">
+                                    <select id="tone-select" class="flex-grow bg-gray-600 text-white rounded-lg p-2 text-sm border border-gray-500">
+                                        <option value="witty">Witty</option>
+                                        <option value="sincere" selected>Sincere</option>
+                                        <option value="enthusiastic">Enthusiastic</option>
+                                        <option value="mysterious">Mysterious</option>
+                                        <option value="professional">Professional</option>
+                                    </select>
+                                    <button id="refine-caption-button" class="bg-cyan-500 text-white py-2 px-3 rounded-lg text-sm font-medium hover:bg-cyan-600">
+                                        Refine
+                                    </button>
+                                </div>
+                                <p id="refine-loading-message" class="text-xs text-cyan-400 hidden">Rewriting...</p>
+                            </div>
+
+                            <div class="mt-4 p-3 bg-gray-700 rounded-lg space-y-3">
+                                <label for="translation-select" class="text-sm font-medium text-amber-300">Translate Caption</label>
+                                <div class="flex space-x-2">
+                                    <select id="translation-select" class="flex-grow bg-gray-600 text-white rounded-lg p-2 text-sm border border-gray-500">
+                                        <option value="Spanish">Spanish</option>
+                                        <option value="French">French</option>
+                                        <option value="Hindi">Hindi</option>
+                                        <option value="Japanese">Japanese</option>
+                                        <option value="German">German</option>
+                                    </select>
+                                    <button id="translate-caption-button" class="bg-amber-500 text-white py-2 px-3 rounded-lg text-sm font-medium hover:bg-amber-600">
+                                        Translate
+                                    </button>
+                                </div>
+                                <p id="translation-loading-message" class="text-xs text-amber-400 hidden">Translating...</p>
+                                <p id="translated-caption-display" class="text-amber-300 text-sm mt-2 hidden border-l-2 border-amber-500 pl-2"></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Music Recommendations Section -->
+                    <div id="music-recommendations" class="harrier-card p-6 rounded-xl space-y-4 hidden">
+                        <h2 class="text-xl font-semibold text-harrier-text">🎵 Music for Your Mood</h2>
+                        <p id="music-mood-text" class="text-gray-400 text-sm">Based on detected emotion</p>
+                        
+                        <!-- Mini Music Player -->
+                        <div id="mini-player" class="music-player p-4 rounded-lg mb-4 hidden">
+                            <div class="flex items-center justify-between mb-3">
+                                <div class="flex items-center space-x-3">
+                                    <button id="play-pause-btn" class="w-8 h-8 bg-white rounded-full flex items-center justify-center hover:bg-gray-200 transition">
+                                        <svg id="play-icon" class="w-4 h-4 text-purple-600" viewBox="0 0 24 24" fill="currentColor">
+                                            <path d="M8 5v14l11-7z"/>
+                                        </svg>
+                                        <svg id="pause-icon" class="w-4 h-4 text-purple-600 hidden" viewBox="0 0 24 24" fill="currentColor">
+                                            <path d="M6 4h4v16H6zm8 0h4v16h-4z"/>
+                                        </svg>
+                                    </button>
+                                    <div>
+                                        <p id="now-playing-title" class="text-white font-medium text-sm">Song Title</p>
+                                        <p id="now-playing-artist" class="text-purple-200 text-xs">Artist</p>
+                                    </div>
+                                </div>
+                                <div class="text-right">
+                                    <p id="current-time-display" class="text-purple-200 text-xs">0:00</p>
+                                    <p id="total-time-display" class="text-purple-300 text-xs">0:00</p>
+                                </div>
+                            </div>
+                            <div class="w-full bg-purple-800 rounded-full h-1">
+                                <div id="progress-bar" class="progress-bar h-1 rounded-full" style="width: 0%"></div>
+                            </div>
+                        </div>
+                        
+                        <div id="music-tracks" class="space-y-3 max-h-48 overflow-y-auto"></div>
+                    </div>
+
+                    <div class="mt-6 space-y-2">
+                        <button id="approve-button" class="btn-car-primary w-full py-3 px-4 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700">
+                            Approve & Post
+                        </button>
+                        <button id="reject-button" class="btn-car-secondary w-full py-2 px-4 bg-red-600 text-white font-medium rounded-lg hover:bg-red-700">
+                            Reject & Restart
+                        </button>
+                    </div>
+                </section>
+
+                <section id="post-section" class="hidden mt-6 p-6 rounded-xl text-center">
+                    <h2 class="text-2xl font-semibold text-green-400 mb-6">3. Content Published!</h2>
+                    <p class="text-gray-400 mb-4">Your AI-curated post is ready.</p>
+
+                    <div class="insta-post rounded-xl shadow-xl">
+                        <div class="flex items-center p-4">
+                            <div class="profile-pic bg-harrier-accent flex items-center justify-center text-sm font-bold">AI</div>
+                            <span class="font-semibold text-white ml-2">roadtrip_ai_curator</span>
+                        </div>
+                        <img id="final-post-image" class="post-image" alt="Final Post">
+                        <div class="flex space-x-4 p-4 text-gray-500 text-xl">
+                            <svg class="w-6 h-6 text-red-500 fill-current cursor-pointer" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                        </div>
+                        <div class="p-4 pt-0">
+                            <span class="font-bold text-white">roadtrip_ai_curator</span> <span id="final-caption"></span>
+                            <p id="final-hashtags" class="text-cyan-400 text-sm mt-1"></p>
+                        </div>
+                    </div>
+
+                    <button id="reset-button" class="mt-8 py-2 px-6 bg-cyan-600 text-white font-medium rounded-lg hover:bg-cyan-700">
+                        Back to Home
+                    </button>
+                </section>
+            </section>
+
+            <!-- Navigation Screen -->
+            <section id="navigation-screen" class="hidden h-full">
+                <header class="text-center mb-6">
+                    <h1 class="text-2xl font-bold text-harrier-text mb-1">AI-Powered Navigation</h1>
+                    <p class="text-harrier-accent/70 text-sm">Smart routing with real-time insights</p>
+                </header>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Smart Destination Input -->
+                    <div class="harrier-card p-6 rounded-xl space-y-4">
+                        <h2 class="text-xl font-semibold text-harrier-text">Smart Destination</h2>
+                        <input type="text" id="destination-input" placeholder="Where to?" class="w-full p-3 bg-gray-800 rounded-lg text-white border border-gray-600 focus:border-harrier-accent">
+                        
+                        <div class="space-y-2">
+                            <button class="ai-suggestion-btn w-full p-3 bg-gray-700 rounded-lg text-left hover:bg-gray-600 transition" data-type="coffee">
+                                ☕ Find specialty coffee shops
+                            </button>
+                            <button class="ai-suggestion-btn w-full p-3 bg-gray-700 rounded-lg text-left hover:bg-gray-600 transition" data-type="scenic">
+                                🏞️ Scenic route suggestions
+                            </button>
+                            <button class="ai-suggestion-btn w-full p-3 bg-gray-700 rounded-lg text-left hover:bg-gray-600 transition" data-type="charging">
+                                ⚡ EV charging stations
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Route Intelligence -->
+                    <div class="harrier-card p-6 rounded-xl space-y-4">
+                        <h2 class="text-xl font-semibold text-harrier-text">Route Intelligence</h2>
+                        
+                        <div class="bg-gradient-to-r from-cyan-600 to-blue-600 p-4 rounded-lg">
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="text-white font-semibold">Current Route</span>
+                                <span class="text-cyan-200 text-sm">AI Optimized</span>
+                            </div>
+                            <p class="text-white text-sm">Eco-friendly route • 45 min • 18 mi</p>
+                        </div>
+
+                        <div class="space-y-3">
+                            <div class="flex justify-between items-center p-3 bg-gray-800 rounded-lg">
+                                <span class="text-gray-300">Traffic Prediction</span>
+                                <span class="text-green-400 font-semibold">Clear</span>
+                            </div>
+                            <div class="flex justify-between items-center p-3 bg-gray-800 rounded-lg">
+                                <span class="text-gray-300">Weather Alert</span>
+                                <span class="text-yellow-400 font-semibold">Light Rain</span>
+                            </div>
+                            <div class="flex justify-between items-center p-3 bg-gray-800 rounded-lg">
+                                <span class="text-gray-300">Energy Efficiency</span>
+                                <span class="text-cyan-400 font-semibold">92%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Augmented Reality Preview -->
+                    <div class="harrier-card p-6 rounded-xl space-y-4 md:col-span-2">
+                        <h2 class="text-xl font-semibold text-harrier-text">AR Route Preview</h2>
+                        <div class="bg-gray-800 rounded-lg h-48 flex items-center justify-center">
+                            <div class="text-center">
+                                <div class="w-16 h-16 bg-cyan-600 rounded-full flex items-center justify-center mx-auto mb-3">
+                                    <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/>
+                                    </svg>
+                                </div>
+                                <p class="text-gray-400">Augmented Reality Navigation</p>
+                                <p class="text-cyan-400 text-sm">Point camera at road to preview route</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Media Screen -->
+            <section id="media-screen" class="hidden h-full">
+                <header class="text-center mb-6">
+                    <h1 class="text-2xl font-bold text-harrier-text mb-1">Immersive Audio Experience</h1>
+                    <p class="text-harrier-accent/70 text-sm">AI-curated soundscapes</p>
+                </header>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <!-- Mood-Based Playlists -->
+                    <div class="harrier-card p-6 rounded-xl space-y-4 md:col-span-2">
+                        <h2 class="text-xl font-semibold text-harrier-text">Mood-Based Audio</h2>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="mood-audio-btn bg-gradient-to-br from-purple-600 to-pink-600 p-4 rounded-lg cursor-pointer hover:scale-105 transition transform" data-mood="focus">
+                                <div class="text-center">
+                                    <div class="text-2xl mb-2">🚀</div>
+                                    <p class="text-white font-semibold">Focus Mode</p>
+                                    <p class="text-purple-200 text-sm">Deep work beats</p>
+                                </div>
+                            </div>
+                            <div class="mood-audio-btn bg-gradient-to-br from-blue-600 to-cyan-600 p-4 rounded-lg cursor-pointer hover:scale-105 transition transform" data-mood="calm">
+                                <div class="text-center">
+                                    <div class="text-2xl mb-2">🌊</div>
+                                    <p class="text-white font-semibold">Calm Journey</p>
+                                    <p class="text-cyan-200 text-sm">Ambient sounds</p>
+                                </div>
+                            </div>
+                            <div class="mood-audio-btn bg-gradient-to-br from-orange-500 to-red-500 p-4 rounded-lg cursor-pointer hover:scale-105 transition transform" data-mood="energy">
+                                <div class="text-center">
+                                    <div class="text-2xl mb-2">⚡</div>
+                                    <p class="text-white font-semibold">Energy Boost</p>
+                                    <p class="text-orange-200 text-sm">Upbeat tracks</p>
+                                </div>
+                            </div>
+                            <div class="mood-audio-btn bg-gradient-to-br from-green-500 to-emerald-500 p-4 rounded-lg cursor-pointer hover:scale-105 transition transform" data-mood="nature">
+                                <div class="text-center">
+                                    <div class="text-2xl mb-2">🌿</div>
+                                    <p class="text-white font-semibold">Nature Drive</p>
+                                    <p class="text-green-200 text-sm">Natural soundscapes</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Advanced Audio Controls -->
+                    <div class="harrier-card p-6 rounded-xl space-y-4">
+                        <h2 class="text-xl font-semibold text-harrier-text">Sound Intelligence</h2>
+                        
+                        <div class="space-y-4">
+                            <div>
+                                <label class="text-gray-400 text-sm">Noise Cancellation</label>
+                                <div class="flex items-center space-x-3 mt-1">
+                                    <input type="range" min="0" max="100" value="75" class="flex-1 accent-cyan-500">
+                                    <span class="text-cyan-400 text-sm">75%</span>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <label class="text-gray-400 text-sm">Voice Enhancement</label>
+                                <div class="flex items-center space-x-3 mt-1">
+                                    <input type="range" min="0" max="100" value="60" class="flex-1 accent-purple-500">
+                                    <span class="text-purple-400 text-sm">60%</span>
+                                </div>
+                            </div>
+
+                            <div class="bg-gray-800 p-3 rounded-lg">
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="text-gray-300">Adaptive Volume</span>
+                                    <label class="toggle-switch">
+                                        <input type="checkbox" checked>
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </div>
+                                <p class="text-cyan-400 text-xs">Auto-adjusts to road noise</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- AI DJ Feature -->
+                    <div class="harrier-card p-6 rounded-xl space-y-4 md:col-span-3">
+                        <h2 class="text-xl font-semibold text-harrier-text">AI DJ Assistant</h2>
+                        <div class="flex items-center space-x-4">
+                            <div class="w-16 h-16 bg-gradient-to-br from-purple-500 to-cyan-500 rounded-full flex items-center justify-center">
+                                <span class="text-white text-2xl">🎵</span>
+                            </div>
+                            <div class="flex-1">
+                                <p class="text-white font-semibold">Current Mix: "Road Trip Energy"</p>
+                                <p class="text-gray-400 text-sm">AI-curated based on driving style and time of day</p>
+                            </div>
+                            <button id="remix-btn" class="bg-cyan-600 text-white px-4 py-2 rounded-lg hover:bg-cyan-700 transition">
+                                Remix
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Climate Screen -->
+            <section id="climate-screen" class="hidden h-full">
+                <header class="text-center mb-6">
+                    <h1 class="text-2xl font-bold text-harrier-text mb-1">Smart Climate Control</h1>
+                    <p class="text-harrier-accent/70 text-sm">AI-optimized comfort</p>
+                </header>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Climate Presets -->
+                    <div class="harrier-card p-6 rounded-xl space-y-4">
+                        <h2 class="text-xl font-semibold text-harrier-text">Comfort Presets</h2>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="climate-preset bg-gradient-to-br from-blue-500 to-cyan-500 p-4 rounded-lg cursor-pointer hover:scale-105 transition transform" data-preset="quick-cool">
+                                <div class="text-center">
+                                    <div class="text-2xl mb-2">❄️</div>
+                                    <p class="text-white font-semibold">Quick Cool</p>
+                                    <p class="text-blue-200 text-sm">Rapid cooling</p>
+                                </div>
+                            </div>
+                            <div class="climate-preset bg-gradient-to-br from-orange-500 to-red-500 p-4 rounded-lg cursor-pointer hover:scale-105 transition transform" data-preset="cozy-warm">
+                                <div class="text-center">
+                                    <div class="text-2xl mb-2">🔥</div>
+                                    <p class="text-white font-semibold">Cozy Warm</p>
+                                    <p class="text-orange-200 text-sm">Even heat</p>
+                                </div>
+                            </div>
+                            <div class="climate-preset bg-gradient-to-br from-green-500 to-emerald-500 p-4 rounded-lg cursor-pointer hover:scale-105 transition transform" data-preset="fresh-air">
+                                <div class="text-center">
+                                    <div class="text-2xl mb-2">💨</div>
+                                    <p class="text-white font-semibold">Fresh Air</p>
+                                    <p class="text-green-200 text-sm">Air purification</p>
+                                </div>
+                            </div>
+                            <div class="climate-preset bg-gradient-to-br from-purple-500 to-pink-500 p-4 rounded-lg cursor-pointer hover:scale-105 transition transform" data-preset="sleep-mode">
+                                <div class="text-center">
+                                    <div class="text-2xl mb-2">🌙</div>
+                                    <p class="text-white font-semibold">Sleep Mode</p>
+                                    <p class="text-purple-200 text-sm">Gentle airflow</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Advanced Climate Controls -->
+                    <div class="harrier-card p-6 rounded-xl space-y-4">
+                        <h2 class="text-xl font-semibold text-harrier-text">Precision Control</h2>
+                        
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-between p-3 bg-gray-800 rounded-lg">
+                                <div>
+                                    <p class="text-white font-medium">Driver Zone</p>
+                                    <p class="text-cyan-400 text-sm">72°F • Auto</p>
+                                </div>
+                                <div class="flex space-x-2">
+                                    <button class="temp-btn w-8 h-8 bg-gray-700 rounded-lg text-white" data-zone="driver" data-direction="down">-</button>
+                                    <button class="temp-btn w-8 h-8 bg-gray-700 rounded-lg text-white" data-zone="driver" data-direction="up">+</button>
+                                </div>
+                            </div>
+
+                            <div class="flex items-center justify-between p-3 bg-gray-800 rounded-lg">
+                                <div>
+                                    <p class="text-white font-medium">Passenger Zone</p>
+                                    <p class="text-purple-400 text-sm">68°F • Manual</p>
+                                </div>
+                                <div class="flex space-x-2">
+                                    <button class="temp-btn w-8 h-8 bg-gray-700 rounded-lg text-white" data-zone="passenger" data-direction="down">-</button>
+                                    <button class="temp-btn w-8 h-8 bg-gray-700 rounded-lg text-white" data-zone="passenger" data-direction="up">+</button>
+                                </div>
+                            </div>
+
+                            <div class="bg-gradient-to-r from-cyan-600 to-blue-600 p-3 rounded-lg">
+                                <div class="flex justify-between items-center">
+                                    <span class="text-white font-medium">Air Quality</span>
+                                    <span class="text-green-400 font-semibold">Excellent</span>
+                                </div>
+                                <div class="flex justify-between text-white text-sm mt-1">
+                                    <span>PM2.5: 3μg/m³</span>
+                                    <span>CO2: 420ppm</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Smart Features -->
+                    <div class="harrier-card p-6 rounded-xl space-y-4 md:col-span-2">
+                        <h2 class="text-xl font-semibold text-harrier-text">Smart Climate Features</h2>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div class="bg-gray-800 p-4 rounded-lg">
+                                <div class="text-cyan-400 text-lg mb-2">🤖</div>
+                                <p class="text-white font-semibold">AI Comfort</p>
+                                <p class="text-gray-400 text-sm">Learns your preferences</p>
+                            </div>
+                            
+                            <div class="bg-gray-800 p-4 rounded-lg">
+                                <div class="text-green-400 text-lg mb-2">🌡️</div>
+                                <p class="text-white font-semibold">Predictive Heating</p>
+                                <p class="text-gray-400 text-sm">Warms car before you enter</p>
+                            </div>
+                            
+                            <div class="bg-gray-800 p-4 rounded-lg">
+                                <div class="text-purple-400 text-lg mb-2">💺</div>
+                                <p class="text-white font-semibold">Seat Climate</p>
+                                <p class="text-gray-400 text-sm">Individual seat control</p>
+                            </div>
+                        </div>
+
+                        <div class="bg-yellow-900/30 border border-yellow-600 rounded-lg p-3 mt-4">
+                            <div class="flex items-center space-x-2">
+                                <span class="text-yellow-400">⚠️</span>
+                                <p class="text-yellow-300 text-sm">Smart recommendation: Enable eco-mode to save 15% energy</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </div>
+    </div>
+
+    <script type="module">
+        // ==================== CONFIGURATION ====================
+        const OLLAMA_API_URL = "http://localhost:11434/api/generate";
+        const VISION_MODEL = "llava";
+        const TEXT_MODEL = "mistral";
+        
+        // IMPORTANT: Add your Hugging Face API token here
+        const HF_API_TOKEN = "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"; // Get from https://huggingface.co/settings/tokens
+        const HF_IMAGE_MODEL = "https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-xl-base-1.0";
+        
+        // ==================== MUSIC RECOMMENDATIONS ====================
+        const moodMusicMap = {
+            // Joy/Happy moods
+            'joy': [
+                { 
+                    title: "Happy", 
+                    artist: "Pharrell Williams", 
+                    genre: "Pop",
+                    duration: 233,
+                    previewUrl: "https://www.soundjay.com/misc/sounds/fail-buzzer-02.wav" // Placeholder
+                },
+                { 
+                    title: "Can't Stop the Feeling", 
+                    artist: "Justin Timberlake", 
+                    genre: "Pop",
+                    duration: 237,
+                    previewUrl: "https://www.soundjay.com/misc/sounds/fail-buzzer-02.wav"
+                }
+            ],
+            'happy': [
+                { 
+                    title: "I Gotta Feeling", 
+                    artist: "Black Eyed Peas", 
+                    genre: "Pop",
+                    duration: 245,
+                    previewUrl: "https://www.soundjay.com/misc/sounds/fail-buzzer-02.wav"
+                },
+                { 
+                    title: "Don't Stop Me Now", 
+                    artist: "Queen", 
+                    genre: "Rock",
+                    duration: 209,
+                    previewUrl: "https://www.soundjay.com/misc/sounds/fail-buzzer-02.wav"
+                }
+            ],
+            'excitement': [
+                { 
+                    title: "Eye of the Tiger", 
+                    artist: "Survivor", 
+                    genre: "Rock",
+                    duration: 245,
+                    previewUrl: "https://www.soundjay.com/misc/sounds/fail-buzzer-02.wav"
+                },
+                { 
+                    title: "Stronger", 
+                    artist: "Kanye West", 
+                    genre: "Hip Hop",
+                    duration: 312,
+                    previewUrl: "https://www.soundjay.com/misc/sounds/fail-buzzer-02.wav"
+                }
+            ],
+            
+            // Calm/Peaceful moods
+            'calm': [
+                { 
+                    title: "Weightless", 
+                    artist: "Marconi Union", 
+                    genre: "Ambient",
+                    duration: 512,
+                    previewUrl: "https://www.soundjay.com/misc/sounds/fail-buzzer-02.wav"
+                },
+                { 
+                    title: "Clair de Lune", 
+                    artist: "Claude Debussy", 
+                    genre: "Classical",
+                    duration: 320,
+                    previewUrl: "https://www.soundjay.com/misc/sounds/fail-buzzer-02.wav"
+                }
+            ],
+            'peace': [
+                { 
+                    title: "Somewhere Over the Rainbow", 
+                    artist: "Israel Kamakawiwo'ole", 
+                    genre: "Folk",
+                    duration: 234,
+                    previewUrl: "https://www.soundjay.com/misc/sounds/fail-buzzer-02.wav"
+                },
+                { 
+                    title: "Three Little Birds", 
+                    artist: "Bob Marley", 
+                    genre: "Reggae",
+                    duration: 180,
+                    previewUrl: "https://www.soundjay.com/misc/sounds/fail-buzzer-02.wav"
+                }
+            ],
+            'serenity': [
+                { 
+                    title: "Strawberry Swing", 
+                    artist: "Coldplay", 
+                    genre: "Alternative",
+                    duration: 260,
+                    previewUrl: "https://www.soundjay.com/misc/sounds/fail-buzzer-02.wav"
+                },
+                { 
+                    title: "Holocene", 
+                    artist: "Bon Iver", 
+                    genre: "Indie Folk",
+                    duration: 335,
+                    previewUrl: "https://www.soundjay.com/misc/sounds/fail-buzzer-02.wav"
+                }
+            ],
+            
+            // Sad/Melancholy moods
+            'sad': [
+                { 
+                    title: "Someone Like You", 
+                    artist: "Adele", 
+                    genre: "Pop",
+                    duration: 285,
+                    previewUrl: "https://www.soundjay.com/misc/sounds/fail-buzzer-02.wav"
+                },
+                { 
+                    title: "The Sound of Silence", 
+                    artist: "Simon & Garfunkel", 
+                    genre: "Folk",
+                    duration: 220,
+                    previewUrl: "https://www.soundjay.com/misc/sounds/fail-buzzer-02.wav"
+                }
+            ],
+            'melancholy': [
+                { 
+                    title: "Mad World", 
+                    artist: "Gary Jules", 
+                    genre: "Alternative",
+                    duration: 233,
+                    previewUrl: "https://www.soundjay.com/misc/sounds/fail-buzzer-02.wav"
+                },
+                { 
+                    title: "Skinny Love", 
+                    artist: "Bon Iver", 
+                    genre: "Indie Folk",
+                    duration: 239,
+                    previewUrl: "https://www.soundjay.com/misc/sounds/fail-buzzer-02.wav"
+                }
+            ],
+            
+            // Focus/Concentration moods
+            'focus': [
+                { 
+                    title: "Focus", 
+                    artist: "Ariana Grande", 
+                    genre: "Pop",
+                    duration: 210,
+                    previewUrl: "https://www.soundjay.com/misc/sounds/fail-buzzer-02.wav"
+                },
+                { 
+                    title: "Work", 
+                    artist: "Rihanna", 
+                    genre: "Pop",
+                    duration: 219,
+                    previewUrl: "https://www.soundjay.com/misc/sounds/fail-buzzer-02.wav"
+                }
+            ],
+            'concentration': [
+                { 
+                    title: "Lateralus", 
+                    artist: "Tool", 
+                    genre: "Progressive Metal",
+                    duration: 521,
+                    previewUrl: "https://www.soundjay.com/misc/sounds/fail-buzzer-02.wav"
+                },
+                { 
+                    title: "Schism", 
+                    artist: "Tool", 
+                    genre: "Progressive Metal",
+                    duration: 415,
+                    previewUrl: "https://www.soundjay.com/misc/sounds/fail-buzzer-02.wav"
+                }
+            ],
+            
+            // Surprise/Amazement moods
+            'surprise': [
+                { 
+                    title: "Somebody That I Used To Know", 
+                    artist: "Gotye", 
+                    genre: "Indie Pop",
+                    duration: 245,
+                    previewUrl: "https://www.soundjay.com/misc/sounds/fail-buzzer-02.wav"
+                },
+                { 
+                    title: "Rolling in the Deep", 
+                    artist: "Adele", 
+                    genre: "Pop",
+                    duration: 228,
+                    previewUrl: "https://www.soundjay.com/misc/sounds/fail-buzzer-02.wav"
+                }
+            ],
+            
+            // Default/fallback
+            'default': [
+                { 
+                    title: "Blinding Lights", 
+                    artist: "The Weeknd", 
+                    genre: "Pop",
+                    duration: 200,
+                    previewUrl: "https://www.soundjay.com/misc/sounds/fail-buzzer-02.wav"
+                },
+                { 
+                    title: "Shape of You", 
+                    artist: "Ed Sheeran", 
+                    genre: "Pop",
+                    duration: 233,
+                    previewUrl: "https://www.soundjay.com/misc/sounds/fail-buzzer-02.wav"
+                }
+            ]
+        };
+
+        // ==================== DOM ELEMENTS ====================
+        const appTitle = document.getElementById('app-title');
+        const backButton = document.getElementById('back-button');
+        
+        // Screen elements
+        const homeScreen = document.getElementById('home-screen');
+        const socialAppView = document.getElementById('social-app-view');
+        const navigationScreen = document.getElementById('navigation-screen');
+        const mediaScreen = document.getElementById('media-screen');
+        const climateScreen = document.getElementById('climate-screen');
+        
+        // Home screen tiles
+        const mediaTile = document.getElementById('media-tile');
+        const navigationTile = document.getElementById('navigation-tile');
+        const climateTile = document.getElementById('climate-tile');
+        const socialAppTile = document.getElementById('social-app-tile');
+        
+        // Social App elements (existing)
+        const uploadInput = document.getElementById('image-upload');
+        const analyzeButton = document.getElementById('analyze-button');
+        const loadingSection = document.getElementById('loading-section');
+        const loadingMessage = document.getElementById('loading-message');
+        const loadingSubmessage = document.getElementById('loading-submessage');
+        const uploadSection = document.getElementById('upload-section');
+        const approvalSection = document.getElementById('approval-section');
+        const approvalImagePreview = document.getElementById('approval-image-preview');
+        const generatedImagePreview = document.getElementById('generated-image-preview');
+        const aiContextDisplay = document.getElementById('ai-context');
+        const suggestedCaptionDisplay = document.getElementById('suggested-caption');
+        const suggestedHashtagsDisplay = document.getElementById('suggested-hashtags');
+        const toneSelect = document.getElementById('tone-select');
+        const refineCaptionButton = document.getElementById('refine-caption-button');
+        const refineLoadingMessage = document.getElementById('refine-loading-message');
+        const translationSelect = document.getElementById('translation-select');
+        const translateCaptionButton = document.getElementById('translate-caption-button');
+        const translationLoadingMessage = document.getElementById('translation-loading-message');
+        const translatedCaptionDisplay = document.getElementById('translated-caption-display');
+        const approveButton = document.getElementById('approve-button');
+        const rejectButton = document.getElementById('reject-button');
+        const postSection = document.getElementById('post-section');
+        const finalPostImage = document.getElementById('final-post-image');
+        const finalCaptionDisplay = document.getElementById('final-caption');
+        const finalHashtagsDisplay = document.getElementById('final-hashtags');
+        const resetButton = document.getElementById('reset-button');
+        
+        // Music elements
+        const musicSection = document.getElementById('music-recommendations');
+        const musicMoodText = document.getElementById('music-mood-text');
+        const musicTracks = document.getElementById('music-tracks');
+        const miniPlayer = document.getElementById('mini-player');
+        const playPauseBtn = document.getElementById('play-pause-btn');
+        const playIcon = document.getElementById('play-icon');
+        const pauseIcon = document.getElementById('pause-icon');
+        const nowPlayingTitle = document.getElementById('now-playing-title');
+        const nowPlayingArtist = document.getElementById('now-playing-artist');
+        const currentTimeDisplay = document.getElementById('current-time-display');
+        const totalTimeDisplay = document.getElementById('total-time-display');
+        const progressBar = document.getElementById('progress-bar');
+        
+        // Navigation elements
+        const destinationInput = document.getElementById('destination-input');
+        
+        // Media elements
+        const remixBtn = document.getElementById('remix-btn');
+        
+        let currentImageBase64 = null; 
+        let generatedCaption = '';
+        let generatedHashtags = '';
+        let generatedImageUrl = '';
+        let detectedMood = '';
+        
+        // Music player state
+        let currentAudio = null;
+        let isPlaying = false;
+        let currentTrack = null;
+        let progressInterval = null;
+
+        // ==================== VIEW MANAGEMENT ====================
+        function setView(viewName) {
+            // Hide all screens
+            homeScreen.classList.add('hidden');
+            socialAppView.classList.add('hidden');
+            navigationScreen.classList.add('hidden');
+            mediaScreen.classList.add('hidden');
+            climateScreen.classList.add('hidden');
+            uploadSection.classList.add('hidden');
+            approvalSection.classList.add('hidden');
+            postSection.classList.add('hidden');
+            loadingSection.classList.add('hidden');
+
+            if (viewName === 'home-screen') {
+                homeScreen.classList.remove('hidden');
+                appTitle.textContent = 'Tata Vibe'; 
+                backButton.classList.add('hidden');
+                resetApplicationInternal();
+            } else if (viewName === 'social-app-view') {
+                socialAppView.classList.remove('hidden');
+                uploadSection.classList.remove('hidden'); 
+                appTitle.textContent = 'Social Post Generator';
+                backButton.classList.remove('hidden');
+            } else if (viewName === 'navigation-screen') {
+                navigationScreen.classList.remove('hidden');
+                appTitle.textContent = 'Navigation';
+                backButton.classList.remove('hidden');
+            } else if (viewName === 'media-screen') {
+                mediaScreen.classList.remove('hidden');
+                appTitle.textContent = 'Media';
+                backButton.classList.remove('hidden');
+            } else if (viewName === 'climate-screen') {
+                climateScreen.classList.remove('hidden');
+                appTitle.textContent = 'Climate';
+                backButton.classList.remove('hidden');
+            } else if (viewName === 'approval-view') {
+                 socialAppView.classList.remove('hidden');
+                 approvalSection.classList.remove('hidden');
+            } else if (viewName === 'post-view') {
+                 socialAppView.classList.remove('hidden');
+                 postSection.classList.remove('hidden');
+            }
+        }
+        
+        function updateTime() {
+            const now = new Date();
+            const timeElement = document.getElementById('current-time');
+            const timeString = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+            timeElement.textContent = timeString;
+        }
+
+        // ==================== MUSIC FUNCTIONS ====================
+        function getMusicRecommendations(mood) {
+            const moodLower = mood.toLowerCase();
+            
+            // Find matching mood in our map
+            for (const [key, songs] of Object.entries(moodMusicMap)) {
+                if (moodLower.includes(key)) {
+                    return songs;
+                }
+            }
+            
+            // Fallback to default if no match found
+            return moodMusicMap.default;
+        }
+
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${mins}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        function playTrack(track) {
+            // Stop current track if playing
+            if (currentAudio) {
+                currentAudio.pause();
+                currentAudio = null;
+            }
+            
+            // Clear existing interval
+            if (progressInterval) {
+                clearInterval(progressInterval);
+            }
+            
+            currentTrack = track;
+            
+            // Update mini player
+            nowPlayingTitle.textContent = track.title;
+            nowPlayingArtist.textContent = track.artist;
+            totalTimeDisplay.textContent = formatTime(track.duration);
+            currentTimeDisplay.textContent = '0:00';
+            progressBar.style.width = '0%';
+            
+            // Show mini player
+            miniPlayer.classList.remove('hidden');
+            
+            // Create audio element (using placeholder URL)
+            currentAudio = new Audio(track.previewUrl);
+            currentAudio.volume = 0.5;
+            
+            // Set up progress tracking
+            progressInterval = setInterval(() => {
+                if (currentAudio && !isNaN(currentAudio.duration)) {
+                    const progress = (currentAudio.currentTime / currentAudio.duration) * 100;
+                    progressBar.style.width = `${progress}%`;
+                    currentTimeDisplay.textContent = formatTime(currentAudio.currentTime);
+                }
+            }, 100);
+            
+            // Play audio
+            currentAudio.play();
+            isPlaying = true;
+            playIcon.classList.add('hidden');
+            pauseIcon.classList.remove('hidden');
+            
+            // Update track UI to show playing state
+            updateTrackPlayingState(track);
+        }
+
+        function togglePlayPause() {
+            if (!currentAudio) return;
+            
+            if (isPlaying) {
+                currentAudio.pause();
+                isPlaying = false;
+                playIcon.classList.remove('hidden');
+                pauseIcon.classList.add('hidden');
+            } else {
+                currentAudio.play();
+                isPlaying = true;
+                playIcon.classList.add('hidden');
+                pauseIcon.classList.remove('hidden');
+            }
+        }
+
+        function stopPlayback() {
+            if (currentAudio) {
+                currentAudio.pause();
+                currentAudio = null;
+            }
+            if (progressInterval) {
+                clearInterval(progressInterval);
+            }
+            isPlaying = false;
+            playIcon.classList.remove('hidden');
+            pauseIcon.classList.add('hidden');
+            progressBar.style.width = '0%';
+            currentTimeDisplay.textContent = '0:00';
+        }
+
+        function updateTrackPlayingState(playingTrack) {
+            // Remove playing class from all tracks
+            document.querySelectorAll('.music-track').forEach(track => {
+                track.classList.remove('playing');
+            });
+            
+            // Add playing class to current track
+            const currentTrackElement = document.querySelector(`[data-track-title="${playingTrack.title}"]`);
+            if (currentTrackElement) {
+                currentTrackElement.classList.add('playing');
+            }
+        }
+
+        async function analyzeMoodForMusic(base64Data) {
+            const prompt = "Analyze the dominant emotion in this image. Choose ONE primary emotion from this list: joy, happy, excitement, calm, peace, serenity, sad, melancholy, focus, concentration, surprise, amazement. Respond with ONLY the emotion word in lowercase.";
+            
+            try {
+                const result = await callOllama(VISION_MODEL, prompt, base64Data);
+                const emotion = result.trim().toLowerCase();
+                
+                // Validate the emotion
+                const validEmotions = ['joy', 'happy', 'excitement', 'calm', 'peace', 'serenity', 'sad', 'melancholy', 'focus', 'concentration', 'surprise', 'amazement'];
+                
+                if (validEmotions.includes(emotion)) {
+                    return emotion;
+                } else {
+                    // If not valid, try to extract emotion from response
+                    for (const validEmotion of validEmotions) {
+                        if (emotion.includes(validEmotion)) {
+                            return validEmotion;
+                        }
+                    }
+                    return 'default';
+                }
+            } catch (error) {
+                console.error("Mood analysis error:", error);
+                return 'default';
+            }
+        }
+
+        function displayMusicRecommendations(mood) {
+            const recommendations = getMusicRecommendations(mood);
+            
+            musicMoodText.innerHTML = `Based on detected emotion: <span class="text-purple-400">${mood}</span>`;
+            musicTracks.innerHTML = '';
+            
+            recommendations.forEach((track, index) => {
+                const trackElement = document.createElement('div');
+                trackElement.className = 'music-track flex items-center justify-between p-3 bg-gray-800 rounded-lg hover:bg-gray-700 transition cursor-pointer';
+                trackElement.setAttribute('data-track-title', track.title);
+                trackElement.innerHTML = `
+                    <div class="flex items-center space-x-3 flex-1">
+                        <div class="w-8 h-8 bg-purple-600 rounded-full flex items-center justify-center text-white text-xs font-bold">
+                            ${index + 1}
+                        </div>
+                        <div class="flex-1">
+                            <p class="text-white font-medium">${track.title}</p>
+                            <p class="text-gray-400 text-sm">${track.artist} • ${track.genre}</p>
+                        </div>
+                        <div class="text-gray-400 text-sm">
+                            ${formatTime(track.duration)}
+                        </div>
+                    </div>
+                    <button class="play-track-btn text-purple-400 hover:text-purple-300 transition ml-3" data-track='${JSON.stringify(track).replace(/'/g, "&apos;")}'>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M8 5v14l11-7z"/>
+                        </svg>
+                    </button>
+                `;
+                musicTracks.appendChild(trackElement);
+                
+                // Add click event to play button
+                const playBtn = trackElement.querySelector('.play-track-btn');
+                playBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    playTrack(track);
+                });
+                
+                // Add click event to entire track
+                trackElement.addEventListener('click', () => {
+                    playTrack(track);
+                });
+            });
+            
+            // Show music section
+            musicSection.classList.remove('hidden');
+        }
+
+        // ==================== NAVIGATION FUNCTIONS ====================
+        function initNavigation() {
+            const suggestionButtons = document.querySelectorAll('.ai-suggestion-btn');
+            
+            suggestionButtons.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const type = this.getAttribute('data-type');
+                    handleAISuggestion(type);
+                });
+            });
+        }
+
+        function handleAISuggestion(type) {
+            const suggestions = {
+                coffee: "Finding the best specialty coffee shops along your route...",
+                scenic: "Calculating the most scenic routes with beautiful viewpoints...", 
+                charging: "Locating available EV charging stations with optimal pricing..."
+            };
+            
+            // Show loading state
+            destinationInput.value = suggestions[type];
+            
+            // Simulate AI processing
+            setTimeout(() => {
+                showRouteRecommendation(type);
+            }, 2000);
+        }
+
+        function showRouteRecommendation(type) {
+            const recommendations = {
+                coffee: "☕ Route optimized for artisanal coffee stops",
+                scenic: "🏞️ Scenic coastal route with 3 photo viewpoints", 
+                charging: "⚡ Eco-route with 2 fast charging stations"
+            };
+            
+            destinationInput.value = recommendations[type];
+            
+            // Show success notification
+            showNotification(`AI found the perfect ${type} route!`, 'success');
+        }
+
+        // ==================== MEDIA FUNCTIONS ====================
+        function initMedia() {
+            // Mood-based audio selection
+            const moodCards = document.querySelectorAll('.mood-audio-btn');
+            moodCards.forEach(card => {
+                card.addEventListener('click', function() {
+                    const mood = this.getAttribute('data-mood');
+                    startMoodPlaylist(mood);
+                });
+            });
+            
+            // Remix button
+            remixBtn.addEventListener('click', function() {
+                remixPlaylist();
+            });
+        }
+
+        function startMoodPlaylist(mood) {
+            const moodNames = {
+                focus: "Focus Mode",
+                calm: "Calm Journey", 
+                energy: "Energy Boost",
+                nature: "Nature Drive"
+            };
+            
+            showNotification(`Starting ${moodNames[mood]} playlist`, 'success');
+            
+            // Visual feedback
+            const allCards = document.querySelectorAll('.mood-audio-btn');
+            allCards.forEach(card => card.style.transform = 'scale(1)');
+            event.currentTarget.style.transform = 'scale(1.05)';
+        }
+
+        function remixPlaylist() {
+            showNotification("AI is remixing your playlist based on current mood...", 'info');
+            
+            // Simulate AI processing
+            setTimeout(() => {
+                showNotification("Playlist remixed! Fresh tracks added.", 'success');
+            }, 1500);
+        }
+
+        // ==================== CLIMATE FUNCTIONS ====================
+        function initClimate() {
+            // Climate preset handlers
+            const climatePresets = document.querySelectorAll('.climate-preset');
+            climatePresets.forEach(preset => {
+                preset.addEventListener('click', function() {
+                    const presetName = this.getAttribute('data-preset');
+                    activateClimatePreset(presetName);
+                });
+            });
+            
+            // Temperature control
+            const tempButtons = document.querySelectorAll('.temp-btn');
+            tempButtons.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const zone = this.getAttribute('data-zone');
+                    const direction = this.getAttribute('data-direction');
+                    adjustTemperature(zone, direction);
+                });
+            });
+        }
+
+        function activateClimatePreset(preset) {
+            const presetNames = {
+                'quick-cool': "Quick Cool",
+                'cozy-warm': "Cozy Warm",
+                'fresh-air': "Fresh Air",
+                'sleep-mode': "Sleep Mode"
+            };
+            
+            showNotification(`${presetNames[preset]} activated`, 'success');
+            
+            // Visual feedback
+            const allPresets = document.querySelectorAll('.climate-preset');
+            allPresets.forEach(preset => preset.style.transform = 'scale(1)');
+            event.currentTarget.style.transform = 'scale(1.05)';
+        }
+
+        function adjustTemperature(zone, direction) {
+            const action = direction === 'up' ? 'increased' : 'decreased';
+            showNotification(`${zone.charAt(0).toUpperCase() + zone.slice(1)} zone temperature ${action}`, 'info');
+        }
+
+        // ==================== UTILITY FUNCTIONS ====================
+        function showNotification(message, type = 'info') {
+            const colors = {
+                info: 'bg-blue-600',
+                success: 'bg-green-600',
+                warning: 'bg-yellow-600',
+                error: 'bg-red-600'
+            };
+            
+            const notification = document.createElement('div');
+            notification.className = `fixed bottom-4 left-4 ${colors[type]} text-white p-4 rounded-lg shadow-lg z-50 animate-pulse`;
+            notification.innerHTML = `
+                <div class="flex items-center space-x-3">
+                    <div class="w-6 h-6 bg-white/20 rounded-full flex items-center justify-center">
+                        <span class="text-sm">💡</span>
+                    </div>
+                    <div>
+                        <p class="font-medium">${message}</p>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+
+        const fileToBase64 = (file) => {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result.split(',')[1]); 
+                reader.onerror = error => reject(error);
+                reader.readAsDataURL(file);
+            });
+        };
+
+        // ==================== OLLAMA API CALLS ====================
+        async function callOllama(model, prompt, imageBase64 = null) {
+            const payload = {
+                model: model,
+                prompt: prompt,
+                stream: false
+            };
+            
+            if (imageBase64) {
+                payload.images = [imageBase64];
+            }
+
+            const response = await fetch(OLLAMA_API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            if (!response.ok) {
+                throw new Error(`Ollama error: ${response.status}`);
+            }
+
+            const result = await response.json();
+            return result.response;
+        }
+
+        // ==================== HUGGING FACE API CALLS ====================
+        async function generateImageWithSDXL(prompt) {
+            if (!HF_API_TOKEN) {
+                throw new Error("Hugging Face API token not set. Please add it to the code.");
+            }
+
+            loadingMessage.textContent = 'Generating scenic image with SDXL...';
+            loadingSubmessage.textContent = 'This may take 20-30 seconds on first run...';
+
+            const response = await fetch(HF_IMAGE_MODEL, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${HF_API_TOKEN}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    inputs: prompt,
+                    parameters: {
+                        num_inference_steps: 30,
+                        guidance_scale: 7.5
+                    }
+                })
+            });
+
+            if (!response.ok) {
+                const error = await response.text();
+                throw new Error(`SDXL API error: ${response.status} - ${error}`);
+            }
+
+            const blob = await response.blob();
+            return URL.createObjectURL(blob);
+        }
+
+        // ==================== AI WORKFLOW (EXISTING) ====================
+        async function analyzeMoment(base64Data) {
+            loadingMessage.textContent = 'Analyzing facial expression & scene with LLaVA...';
+            loadingSubmessage.textContent = 'Detecting emotion and context...';
+
+            const prompt = "Analyze this image. Identify the person's facial expression and dominant emotion (Joy, Sadness, Surprise, Calm, Focus, Excitement, etc.) and briefly describe the scene or setting in 3-5 words. Format: 'Emotion: brief scene description'. Be specific about the emotion.";
+            
+            const result = await callOllama(VISION_MODEL, prompt, base64Data);
+            return result.trim();
+        }
+
+        async function generateCaption(context) {
+            loadingMessage.textContent = 'Crafting caption with Mistral...';
+            loadingSubmessage.textContent = 'Creating engaging social media content...';
+
+            const prompt = `Based on this emotional analysis and scene: "${context}", create an engaging Instagram caption (under 20 words) that matches the detected emotion and 3 relevant hashtags. Format:
+CAPTION: [your caption]
+HASHTAGS: #tag1 #tag2 #tag3`;
+
+            const result = await callOllama(TEXT_MODEL, prompt);
+            
+            const captionMatch = result.match(/CAPTION:\s*(.+?)(?=HASHTAGS:|$)/s);
+            const hashtagsMatch = result.match(/HASHTAGS:\s*(.+)/s);
+            
+            return {
+                caption: captionMatch ? captionMatch[1].trim() : "What a moment!",
+                hashtags: hashtagsMatch ? hashtagsMatch[1].trim() : "#memories #moment #life"
+            };
+        }
+
+        async function generateSceneImage(context) {
+            const emotion = context.split(':')[0].trim().toLowerCase();
+            
+            let imagePrompt = "A beautiful scenic road trip view from a car window, cinematic, ultra realistic, high quality";
+            
+            if (emotion.includes('joy') || emotion.includes('happy') || emotion.includes('excit')) {
+                imagePrompt = "A vibrant, sunny scenic view of mountains and clear blue sky as seen from a car window during a road trip, perfect weather, ultra realistic, cinematic lighting";
+            } else if (emotion.includes('sad') || emotion.includes('tired') || emotion.includes('melancholy')) {
+                imagePrompt = "A moody, overcast view of a rainy highway with heavy traffic as seen from inside a car, atmospheric, cinematic, realistic";
+            } else if (emotion.includes('calm') || emotion.includes('serenity') || emotion.includes('peace')) {
+                imagePrompt = "A peaceful sunset view over an empty highway stretching to the horizon, warm golden lighting, serene atmosphere, ultra realistic";
+            } else if (emotion.includes('surprise') || emotion.includes('amaz')) {
+                imagePrompt = "A stunning, dramatic landscape view from a mountain road, breathtaking scenery, golden hour lighting, cinematic, ultra realistic";
+            } else if (emotion.includes('focus') || emotion.includes('concentration')) {
+                imagePrompt = "A futuristic, clean dashboard view with the road ahead visible through windshield, high-tech, minimalist, deep blue tones, ultra realistic";
+            }
+
+            return await generateImageWithSDXL(imagePrompt);
+        }
+
+        async function refineCaption(originalCaption, tone) {
+            refineLoadingMessage.classList.remove('hidden');
+            refineCaptionButton.disabled = true;
+            refineCaptionButton.textContent = 'Wait...';
+            
+            const prompt = `Rewrite this Instagram caption with a ${tone} tone. Keep it under 20 words and engaging. Original: "${originalCaption}". Output only the new caption.`;
+
+            try {
+                const result = await callOllama(TEXT_MODEL, prompt);
+                return result.trim();
+            } catch (error) {
+                console.error("Refinement error:", error);
+                return originalCaption;
+            } finally {
+                refineLoadingMessage.classList.add('hidden');
+                refineCaptionButton.disabled = false;
+                refineCaptionButton.textContent = 'Refine';
+                translatedCaptionDisplay.classList.add('hidden');
+            }
+        }
+
+        async function translateCaption() {
+            translationLoadingMessage.classList.remove('hidden');
+            translateCaptionButton.disabled = true;
+            translateCaptionButton.textContent = 'Wait...';
+
+            const targetLang = translationSelect.value;
+            const originalText = generatedCaption;
+
+            if (!originalText) {
+                translationLoadingMessage.textContent = 'No caption to translate.';
+                setTimeout(() => translationLoadingMessage.classList.add('hidden'), 3000);
+                translateCaptionButton.disabled = false;
+                translateCaptionButton.textContent = 'Translate';
+                return;
+            }
+
+            const prompt = `Translate this English caption to ${targetLang}. Output only the translation: "${originalText}"`;
+
+            try {
+                const result = await callOllama(TEXT_MODEL, prompt);
+                translatedCaptionDisplay.textContent = `${targetLang}: ${result.trim()}`;
+                translatedCaptionDisplay.classList.remove('hidden');
+            } catch (error) {
+                console.error("Translation error:", error);
+                translatedCaptionDisplay.textContent = 'Translation failed.';
+                translatedCaptionDisplay.classList.remove('hidden');
+            } finally {
+                translationLoadingMessage.classList.add('hidden');
+                translateCaptionButton.disabled = false;
+                translateCaptionButton.textContent = 'Translate';
+            }
+        }
+
+        // ==================== EVENT HANDLERS ====================
+        uploadInput.addEventListener('change', (e) => {
+            const hasFile = e.target.files.length > 0;
+            analyzeButton.disabled = !hasFile;
+            analyzeButton.classList.toggle('opacity-50', !hasFile);
+            analyzeButton.classList.toggle('cursor-not-allowed', !hasFile);
+        });
+
+        analyzeButton.addEventListener('click', async () => {
+            const file = uploadInput.files[0];
+            if (!file) return;
+
+            if (!HF_API_TOKEN) {
+                alert('Please add your Hugging Face API token to the code first!\n\nGet it from: https://huggingface.co/settings/tokens');
+                return;
+            }
+
+            socialAppView.classList.remove('hidden');
+            loadingSection.classList.remove('hidden');
+            uploadSection.classList.add('hidden');
+
+            try {
+                currentImageBase64 = await fileToBase64(file);
+                approvalImagePreview.src = `data:${file.type};base64,${currentImageBase64}`;
+
+                const aiContext = await analyzeMoment(currentImageBase64);
+                aiContextDisplay.textContent = aiContext;
+
+                // Extract mood for music recommendations using specialized analysis
+                loadingMessage.textContent = 'Analyzing mood for music recommendations...';
+                loadingSubmessage.textContent = 'Finding the perfect soundtrack for your mood...';
+                detectedMood = await analyzeMoodForMusic(currentImageBase64);
+                
+                const captionResult = await generateCaption(aiContext);
+                generatedCaption = captionResult.caption;
+                generatedHashtags = captionResult.hashtags;
+                suggestedCaptionDisplay.textContent = generatedCaption;
+                suggestedHashtagsDisplay.textContent = generatedHashtags;
+
+                generatedImageUrl = await generateSceneImage(aiContext);
+                generatedImagePreview.src = generatedImageUrl;
+
+                // Display music recommendations based on detected mood
+                displayMusicRecommendations(detectedMood);
+
+                loadingSection.classList.add('hidden');
+                setView('approval-view');
+
+            } catch (error) {
+                console.error("AI Workflow Error:", error);
+                loadingMessage.textContent = `Error: ${error.message}`;
+                loadingSubmessage.textContent = 'Check console for details. Make sure Ollama is running and HF token is set.';
+                setTimeout(() => {
+                    loadingSection.classList.add('hidden');
+                    setView('social-app-view'); 
+                    resetApplicationInternal();
+                }, 5000);
+            }
+        });
+
+        refineCaptionButton.addEventListener('click', async () => {
+            const selectedTone = toneSelect.value;
+            const newCaption = await refineCaption(generatedCaption, selectedTone);
+            generatedCaption = newCaption;
+            suggestedCaptionDisplay.textContent = generatedCaption;
+        });
+        
+        translateCaptionButton.addEventListener('click', translateCaption);
+
+        // Music player events
+        playPauseBtn.addEventListener('click', togglePlayPause);
+
+        approveButton.addEventListener('click', () => {
+            stopPlayback();
+            finalPostImage.src = generatedImageUrl || approvalImagePreview.src;
+            finalCaptionDisplay.textContent = generatedCaption;
+            finalHashtagsDisplay.textContent = generatedHashtags;
+            setView('post-view');
+        });
+
+        rejectButton.addEventListener('click', () => {
+            stopPlayback();
+            if (generatedImageUrl) {
+                URL.revokeObjectURL(generatedImageUrl);
+            }
+            setView('social-app-view'); 
+        });
+
+        resetButton.addEventListener('click', () => {
+            stopPlayback();
+            if (generatedImageUrl) {
+                URL.revokeObjectURL(generatedImageUrl);
+            }
+            setView('home-screen'); 
+        });
+
+        function resetApplicationInternal() {
+            uploadInput.value = '';
+            currentImageBase64 = null;
+            generatedCaption = '';
+            generatedHashtags = '';
+            detectedMood = '';
+            
+            if (generatedImageUrl) {
+                URL.revokeObjectURL(generatedImageUrl);
+                generatedImageUrl = '';
+            }
+            
+            translatedCaptionDisplay.classList.add('hidden');
+            
+            // Hide music section and player
+            musicSection.classList.add('hidden');
+            miniPlayer.classList.add('hidden');
+            
+            analyzeButton.disabled = true;
+            analyzeButton.classList.add('opacity-50', 'cursor-not-allowed');
+            
+            loadingSection.classList.add('hidden');
+            approvalSection.classList.add('hidden');
+            postSection.classList.add('hidden');
+        }
+        
+        // ==================== INITIALIZATION ====================
+        // Home screen navigation
+        mediaTile.addEventListener('click', () => setView('media-screen'));
+        navigationTile.addEventListener('click', () => setView('navigation-screen'));
+        climateTile.addEventListener('click', () => setView('climate-screen'));
+        socialAppTile.addEventListener('click', () => setView('social-app-view'));
+        backButton.addEventListener('click', () => setView('home-screen'));
+
+        // Initialize new features
+        initNavigation();
+        initMedia();
+        initClimate();
+
+        setView('home-screen');
+        updateTime();
+        setInterval(updateTime, 60000);
+
+    </script>
+</body>
+</html>
